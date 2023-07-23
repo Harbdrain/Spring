@@ -1,7 +1,6 @@
 package com.danil.spring.config;
 
 import java.util.Collection;
-import java.util.Set;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class JwtAuthenticationToken implements Authentication {
     private String token;
     private String principal;
-    private Set<GrantedAuthority> authorities;
+    private Collection<GrantedAuthority> authorities;
     private boolean authenticated = false;
 
     public JwtAuthenticationToken(String token) {
@@ -24,7 +23,7 @@ public class JwtAuthenticationToken implements Authentication {
         return this.principal;
     }
 
-    public void setAuthorities(Set<GrantedAuthority> authorities) {
+    public void setAuthorities(Collection<GrantedAuthority> authorities) {
         this.authorities = authorities;
     }
 

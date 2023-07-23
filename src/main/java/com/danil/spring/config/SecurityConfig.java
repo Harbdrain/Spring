@@ -27,9 +27,10 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers(HttpMethod.POST, "/api/v1/register", "/api/v1/auth")
-                                .permitAll())
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/api/v1/test").authenticated())
+                        authorize -> authorize
+                                .requestMatchers(HttpMethod.POST, "/api/v1/register", "/api/v1/auth").permitAll()
+                                .requestMatchers("/api/v1/users/**").authenticated()
+                                .anyRequest().denyAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAuthenticationFilter(providerManager()), BasicAuthenticationFilter.class);
         return http.build();

@@ -1,14 +1,18 @@
 package com.danil.spring.config;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+
+import com.danil.spring.model.UserRole;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -32,7 +36,11 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
             JwtParser parser = Jwts.parserBuilder().setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())).build();
             Claims claims = (Claims) parser.parse(authenticationToken.getToken()).getBody();
             resultToken.setPrincipal(claims.getSubject());
-            resultToken.setAuthorities(Collections.singleton(new SimpleGrantedAuthority((String) claims.get("role"))));
+
+            List<GrantedAuthority> authorities = new ArrayList<>();
+            UserRole.getRoleByName((String) claims.get("role")).getAuthorities()
+                    .forEach(authority -> authorities.add(new SimpleGrantedAuthority(authority.getAuthority())));
+            resultToken.setAuthorities(authorities);
 
             if (claims.getExpiration().after(new Date())) {
                 resultToken.setAuthenticated(true);

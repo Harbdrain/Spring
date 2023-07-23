@@ -2,8 +2,6 @@ package com.danil.spring.rest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +16,8 @@ import com.danil.spring.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
-@RestController
 @RequiredArgsConstructor
+@RestController
 @RequestMapping("/api/v1")
 public class AuthController {
     private final UserService userService;
@@ -27,7 +25,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody RegisterRequest registerRequest) {
-        if (registerRequest == null || registerRequest.getUsername() == null || registerRequest.getPassword() == null) {
+        if (registerRequest == null || !registerRequest.valid()) {
             return ResponseEntity.badRequest().build();
         }
         userService.createUser(registerRequest.getUsername(), registerRequest.getPassword());
@@ -36,7 +34,7 @@ public class AuthController {
 
     @PostMapping("/auth")
     public ResponseEntity<AuthResponse> auth(@RequestBody AuthRequest authRequest) {
-        if (authRequest == null || authRequest.getUsername() == null || authRequest.getPassword() == null) {
+        if (authRequest == null || !authRequest.valid()) {
             return ResponseEntity.badRequest().build();
         }
         User user = userService.validateUser(authRequest.getUsername(), authRequest.getPassword()).orElse(null);
@@ -46,11 +44,5 @@ public class AuthController {
 
         String token = jwtService.generateToken(user);
         return ResponseEntity.ok(AuthResponse.builder().token(token).build());
-    }
-
-    @GetMapping("/test")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public String test() {
-        return "Works!";
     }
 }

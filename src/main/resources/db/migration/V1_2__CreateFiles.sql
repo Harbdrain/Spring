@@ -1,10 +1,10 @@
-CREATE TABLE spring.users (
+CREATE TABLE spring.files (
 	id INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
-	username VARCHAR(64) NOT NULL UNIQUE,
-    password VARCHAR(2048) NOT NULL,
-    role VARCHAR(32) NOT NULL,
+	filename VARCHAR(64) NOT NULL,
+	location VARCHAR(128) NOT NULL,
     status VARCHAR(32) NOT NULL
 )
 ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_unicode_ci;
+
