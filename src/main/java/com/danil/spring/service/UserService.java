@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.danil.spring.exception.UserNotFoundException;
 import com.danil.spring.model.Event;
 import com.danil.spring.model.Status;
 import com.danil.spring.model.User;
@@ -37,8 +38,7 @@ public class UserService {
 
     public Optional<User> validateUser(String username, String password) {
         User user = userRepository.findByUsername(username).orElse(null);
-        if (user == null || !passwordEncoder.matches(password, user.getPassword())
-                || user.getStatus() == Status.DELETED) {
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
             user = null;
         }
 
@@ -47,21 +47,13 @@ public class UserService {
 
     public List<User> findAllUsers() {
         List<User> users = userRepository.findAll();
-        Iterator<User> iterator = users.iterator();
-        while (iterator.hasNext()) {
-            User user = iterator.next();
-            if (user.getStatus() == Status.DELETED) {
-                iterator.remove();
-            }
-        }
-
         return users;
     }
 
-    public Optional<User> findUser(String username) {
-        User user = userRepository.findByUsernameFull(username).orElse(null);
-        if (user == null || user.getStatus() == Status.DELETED) {
-            return Optional.ofNullable(null);
+    public User findUser(String username) {
+        User user = userRepository.findByUsernameFull(username).orElseThrow(() -> new UserNotFoundException());
+        if (user.getStatus() == Status.DELETED) {
+            throw new UserNotFoundException();
         }
 
         Iterator<Event> eventIterator = user.getEvents().iterator();
@@ -78,20 +70,16 @@ public class UserService {
             }
         }
 
-        return Optional.of(user);
+        return user;
     }
 
-    public Optional<User> updateUser(String username, String newUsername, String password, UserRole role) {
-        User user = userRepository.findByUsername(username).orElse(null);
-        if (user == null) {
-            return Optional.ofNullable(null);
-        }
+    public void updateUser(String username, String newUsername, String password, UserRole role) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException());
 
         user.setUsername(newUsername);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(role);
         user = userRepository.save(user);
-        return Optional.of(user);
     }
 
     public void deleteUser(String username) {

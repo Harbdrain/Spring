@@ -1,4 +1,4 @@
-package com.danil.spring.config;
+package com.danil.spring.security;
 
 import java.io.IOException;
 

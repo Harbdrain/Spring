@@ -52,22 +52,19 @@ public class UserController {
     @GetMapping("/{username}")
     @PreAuthorize("hasAuthority('user:readall') || hasAuthority('user:read') && #username == authentication.name")
     public ResponseEntity<GetUserResponse> getUser(@PathVariable String username) {
-        User user = userService.findUser(username).orElse(null);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-
+        User user = userService.findUser(username);
         return ResponseEntity.ok(GetUserResponse.fromUser(user));
     }
 
     @PutMapping("/{username}")
     @PreAuthorize("hasAuthority('user:update')")
-    public ResponseEntity<Void> updateUser(@PathVariable String username, @RequestBody UpdateUserRequest updateUserRequest) {
+    public ResponseEntity<Void> updateUser(@PathVariable String username,
+            @RequestBody UpdateUserRequest updateUserRequest) {
         if (updateUserRequest == null || !updateUserRequest.valid()) {
             return ResponseEntity.badRequest().build();
         }
-        userService.updateUser(username, updateUserRequest.getUsername(), updateUserRequest.getPassword(), updateUserRequest.getRole());
-
+        userService.updateUser(username, updateUserRequest.getUsername(), updateUserRequest.getPassword(),
+                updateUserRequest.getRole());
         return ResponseEntity.ok().build();
     }
 

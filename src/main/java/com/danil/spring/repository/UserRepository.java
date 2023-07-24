@@ -15,8 +15,10 @@ import jakarta.transaction.Transactional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
-    Optional<User> findByUsername(String username);
+    @Query("FROM User u WHERE u.username = :username AND u.status != 'DELETED'")
+    Optional<User> findByUsername(@Param("username") String username);
 
+    @Query("FROM User u WHERE u.status != 'DELETED'")
     List<User> findAll();
 
     @Query("FROM User u LEFT JOIN FETCH u.events e LEFT JOIN FETCH e.file WHERE u.username = :username")
