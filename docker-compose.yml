@@ -1,0 +1,29 @@
+version: '3.1'
+
+services:
+
+  mariadb:
+    image: mariadb:11.0.2
+    container_name: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD_HASH: ""
+      MARIADB_USER: Harbdrain
+      MARIADB_PASSWORD_HASH: "*97E7471D816A37E38510728AEA47440F9C6E2585"
+      MARIADB_DATABASE: spring
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    expose: 
+      - 3306
+
+  spring:
+    build: .
+    container_name: spring
+    ports:
+      - 8080:8080
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
