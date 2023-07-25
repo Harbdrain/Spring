@@ -1,88 +1,23 @@
 package com.danil.spring.service;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import com.danil.spring.exception.UserNotFoundException;
-import com.danil.spring.model.Event;
-import com.danil.spring.model.Status;
 import com.danil.spring.model.User;
 import com.danil.spring.model.UserRole;
-import com.danil.spring.repository.UserRepository;
 
-import lombok.RequiredArgsConstructor;
+public interface UserService {
+    public User createUser(String username, String password, UserRole role);
 
-@Service
-@RequiredArgsConstructor
-public class UserService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    public User createUser(String username, String password);
 
-    public User createUser(String username, String password, UserRole role) {
-        User user = User.builder()
-                .username(username)
-                .password(passwordEncoder.encode(password))
-                .role(role)
-                .status(Status.ACTIVE)
-                .build();
-        return userRepository.save(user);
-    }
+    public Optional<User> validateUser(String username, String password);
 
-    public User createUser(String username, String password) {
-        return createUser(username, password, UserRole.USER);
-    }
+    public List<User> findAllUsers();
 
-    public Optional<User> validateUser(String username, String password) {
-        User user = userRepository.findByUsername(username).orElse(null);
-        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
-            user = null;
-        }
+    public User findUser(String username);
 
-        return Optional.ofNullable(user);
-    }
+    public void updateUser(String username, String newUsername, String password, UserRole role);
 
-    public List<User> findAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users;
-    }
-
-    public User findUser(String username) {
-        User user = userRepository.findByUsernameFull(username).orElseThrow(() -> new UserNotFoundException());
-        if (user.getStatus() == Status.DELETED) {
-            throw new UserNotFoundException();
-        }
-
-        Iterator<Event> eventIterator = user.getEvents().iterator();
-        while (eventIterator.hasNext()) {
-            Event event = eventIterator.next();
-            if (event.getStatus() == Status.DELETED) {
-                eventIterator.remove();
-                continue;
-            }
-
-            if (event.getFile().getStatus() == Status.DELETED) {
-                eventIterator.remove();
-                continue;
-            }
-        }
-
-        return user;
-    }
-
-    public void updateUser(String username, String newUsername, String password, UserRole role) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException());
-
-        user.setUsername(newUsername);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setRole(role);
-        user = userRepository.save(user);
-    }
-
-    public void deleteUser(String username) {
-        userRepository.deleteByUsername(username);
-    }
+    public void deleteUser(String username);
 }
